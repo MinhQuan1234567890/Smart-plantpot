@@ -1,0 +1,85 @@
+/*
+  data read from sensor:
+  670: DRY
+  1024: WET
+*/
+#define BLYNK_TEMPLATE_ID "quan"
+#define BLYNK_TEMPLATE_NAME "quan"
+#define BLYNK_AUTH_TOKEN "VpW9ux39cU8P0REqkcSbpiWz6O-jF1sC" //  qgJ84z-TLDzsk1Kjtmrg2ENIgWMjyZe0
+
+#define sensor A0
+
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+
+#define led 16   // LED onboard NodeMCU (GPIO2)
+
+SimpleTimer timer;
+
+int status_now = 0; // 0: manual, 1: auto
+int status_now2 = 0;
+char auth[] = BLYNK_AUTH_TOKEN;
+char ssid[] = "TEKY OFFICE _2GH_IoT";
+char pass[] = "Teky@2018";
+
+/* Widget Button V1 */
+BLYNK_WRITE(V1)
+{
+  int state = param.asInt();   // 0 hoặc 1
+  status_now = state;
+}
+BLYNK_WRITE(V2)
+{
+  int state2 = param.asInt();   // 0 hoặc 1
+  status_now2 = state2;
+}
+void setup() {
+  Serial.begin(115200);
+  pinMode(sensor,INPUT);
+  pinMode(led, OUTPUT);
+  digitalWrite(led, LOW); // LED onboard ESP8266: HIGH = OFF
+  timer.setInterval(1000, handletime);
+  Blynk.begin(auth, ssid, pass, "blynk-server.com", 8080);
+  // while(WiFi.status() != WL_CONNECTED)
+  // {
+  //   Serial.println(".");
+  //   delay(1000);
+  // }
+  // Serial.println("DONE");
+}
+
+void handletime() {
+  int data = map(analogRead(sensor),700, 1024, 0, 100);
+
+  Serial.println(data);
+  Serial.print("%");
+  Blynk.virtualWrite(V0, data);
+  if (status_now == 1)
+  {
+    // AUTO
+    if (data < 30) {
+      digitalWrite(led, HIGH);
+      delay(500);      
+      digitalWrite(led, LOW);
+      delay(500);
+    }
+    else {
+      digitalWrite(led, LOW);
+      delay(500);
+  }
+  else
+  {
+    if (status_now2 == 1) {
+      digitalWrite(led, HIGH);
+    }
+    else {
+      digitalWrite(led, LOW);
+    }
+  }
+  delay(500);
+}
+
+void loop() {
+  Blynk.run();
+  timer.run();
+}
