@@ -24,6 +24,8 @@
 
 3. Code
 
+-check out file: https://github.com/MinhQuan1234567890/Smart-plantpot/blob/main/planting
+
 4. Image of project
 
 -Project's hardware: 
